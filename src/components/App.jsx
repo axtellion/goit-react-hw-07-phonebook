@@ -7,6 +7,7 @@ import { ContactForm } from './ContactForm/ContactForm';
 import { Filter } from './Filter/Filter';
 import { ContactList } from './ContactList/ContactList';
 import { Layout } from './Layout/Layout';
+import { Loader } from './Loader/loader';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,7 +17,7 @@ import { useFetchContactsQuery } from 'redux/contactsApi';
 
 export const App = () => {
   const [addContact] = useAddContactMutation();
-  const { data: contacts } = useFetchContactsQuery();
+  const { data: contacts, isFetching } = useFetchContactsQuery();
 
   const addContacts = ({ name, number }) => {
     const errorName = contacts.find(contact => contact.name === name);
@@ -29,14 +30,16 @@ export const App = () => {
     addContact(contact);
   };
 
+  console.log(isFetching);
+  const contactList = contacts && <ContactList contacts={contacts} />;
   return (
-    <Box as="main" width="1024px" mx="auto">
+    <Box as="main" width="1024px" mx="auto" pb="50px">
       <Layout />
       <ContactForm onSubmit={addContacts} />
       <WrapList>
         <Title>Contacts</Title>
         <Filter />
-        {contacts && <ContactList contacts={contacts} />}
+        {isFetching === true ? <Loader /> : contactList}
       </WrapList>
       <ToastContainer theme="colored" autoClose={3000} />
       <GlobalStyle />
