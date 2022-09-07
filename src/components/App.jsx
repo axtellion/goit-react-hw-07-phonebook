@@ -1,5 +1,5 @@
 import { Box } from './Box';
-import { nanoid } from 'nanoid';
+
 import { Title, WrapList } from './App.styled';
 import { GlobalStyle } from './GlobalStyle';
 
@@ -11,14 +11,12 @@ import { Layout } from './Layout/Layout';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { add } from '../redux/itemsSlice';
+import { useAddContactMutation } from 'redux/contactsApi';
+import { useFetchContactsQuery } from 'redux/contactsApi';
 
 export const App = () => {
-  const dispatch = useDispatch();
-
-  const contacts = useSelector(state => state.items.contacts);
-  const filter = useSelector(state => state.items.filter);
+  const [addContact] = useAddContactMutation();
+  const { data: contacts } = useFetchContactsQuery();
 
   const addContacts = ({ name, number }) => {
     const errorName = contacts.find(contact => contact.name === name);
@@ -27,19 +25,9 @@ export const App = () => {
       return;
     }
 
-    const contact = { id: nanoid(), name, number };
-    dispatch(add(contact));
+    const contact = { name, number };
+    addContact(contact);
   };
-
-  const getVisibleContact = () => {
-    const normalizedFilter = filter.toLowerCase();
-
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(normalizedFilter)
-    );
-  };
-
-  getVisibleContact();
 
   return (
     <Box as="main" width="1024px" mx="auto">
@@ -48,7 +36,7 @@ export const App = () => {
       <WrapList>
         <Title>Contacts</Title>
         <Filter />
-        <ContactList contacts={getVisibleContact()} />
+        {contacts && <ContactList contacts={contacts} />}
       </WrapList>
       <ToastContainer theme="colored" autoClose={3000} />
       <GlobalStyle />

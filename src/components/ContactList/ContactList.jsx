@@ -2,22 +2,28 @@ import { Box } from 'components/Box';
 import { List, Text, Item } from './ContactList.styled';
 import PropTypes from 'prop-types';
 import { FiTrash2 } from 'react-icons/fi';
-import { useDispatch } from 'react-redux';
-import { remove } from 'redux/itemsSlice';
 
-export const ContactList = ({ contacts, onDeleteContact }) => {
-  const dispatch = useDispatch();
+import { useSelector } from 'react-redux';
+import { useDeleteContactMutation } from 'redux/contactsApi';
 
+export const ContactList = ({ contacts }) => {
+  const [deleteContact] = useDeleteContactMutation();
+
+  const filter = useSelector(state => state.filter.filter);
+
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
+  );
   return (
     <Box display="flex" justifyContent="center">
       <List>
-        {contacts.map(({ id, name, number }) => {
+        {filteredContacts.map(({ id, name, phone }) => {
           return (
             <Item key={id}>
               <Text>{name}:</Text>
               <Text>
-                {number}
-                <FiTrash2 onClick={() => dispatch(remove(id))} />
+                {phone}
+                <FiTrash2 onClick={() => deleteContact(id)} />
               </Text>
             </Item>
           );
